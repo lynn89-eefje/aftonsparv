@@ -5,6 +5,7 @@
     let intro = $state(false);
     let addSession = $state(true);
     let newName = $state("");
+    let slackID = $state("");
 
     let sessionsLocked = $state(false);
     $effect(() => {
@@ -17,7 +18,7 @@
 
     onMount(function() {
         setTimeout(() => {intro = true;}, 100);
-        setTimeout(() => {document.getElementById("newSessionInput").focus()}, 1000);
+        setTimeout(() => {document.getElementById("newSessionInput").focus()}, 200);
     })
 
     function newSession() {
@@ -83,14 +84,19 @@
         {#if sessions.length == 0 && !addSession}
         <h3><i>None selected</i></h3>
         {/if}
-        {#if !sessionsLocked}<h3 id="buttons"><button onclick={() => {addSession = true; setTimeout(() => {document.getElementById("newSessionInput").focus()}, 1000);}}><span title="Add Session" translate = "no" class="material-symbols-outlined">add_circle</span></button><button onclick={() => {sessionsLocked = true;}}><span title="Confirm Sessions" translate = "no" class="material-symbols-outlined">check_circle</span></button></h3>
+        {#if !sessionsLocked}<h3 id="buttons"><button onclick={() => {addSession = true; setTimeout(() => {document.getElementById("newSessionInput").focus()}, 100);}}><span title="Add Session" translate = "no" class="material-symbols-outlined">add_circle</span></button><button onclick={() => {sessionsLocked = true; setTimeout(() => {document.getElementById("idInput").focus()}, 100);}}><span title="Confirm Sessions" translate = "no" class="material-symbols-outlined">check_circle</span></button></h3>
         <p>If you wish to see overall user statistics, confirm without selecting any sessions.</p>{/if}
-        {#if sessionsLocked}<h4 transition:slide={{axis:"x"}} style="position: absolute; top: 5px; right: 20px; font-weight: 700"><span translate="no" class="material-symbols-outlined">lock</span></h4>{/if}
+        {#if sessionsLocked}<h4 transition:slide={{axis:"x"}} style="position: absolute; top: 5px; right: 20px"><span style="font-weight: 700" translate="no" class="material-symbols-outlined">lock</span></h4>{/if}
     </div>
 
     {#if sessionsLocked}
         <div class="field" transition:fly={{y:200}}>
             <h2>Slack ID</h2>
+            <form onsubmit={next}>
+                <h3>Enter Slack ID</h3>
+                <input required type="text" placeholder="Type here" id="idInput" bind:value={slackID}/>
+                <input type="submit" value="Enter ID" />
+                <p>*If you're not sure what the ID of an user is, use the #what-is-my-slack-id channel!</p>
         </div>
     {/if}
 
