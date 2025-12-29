@@ -1,8 +1,10 @@
 <script>
     import { onMount } from "svelte";
     import { fly, slide } from "svelte/transition";
+    import { base } from "$app/paths";
 
     let intro = $state(false);
+
     let addSession = $state(true);
     let newName = $state("");
     let slackID = $state("");
@@ -33,8 +35,31 @@
     function removeSession(target) {
         sessions.shift(target);
     }
+
+    function next() {
+        scrollTo(document.getElementById("idInput").y);
+        let sessionsString = "";
+        if (sessions.length > 1) {
+            for (let i = 0; i < sessions.length; i++) {
+                sessionsString += sessions[i] + "[x]";
+            }
+        }
+        else if (sessions.length == 1) {
+            sessionsString = sessions[0];
+        }
+
+        window.location.href = base + "/" + slackID + "/" + sessionsString;
+    }
+    onMount(function() {
+        window.addEventListener("keydown", function(event) {
+            if (event.key == "Escape") {
+                sessionsLocked = true;
+            }
+            this.setTimeout(() => {this.document.getElementById("idInput").focus(); this.scrollTo(this.document.getElementById("idInput")).y;}, 100)
+        })
+    })
 </script>
-<svelte:head>
+<svelte:head>   
     <title>Aftonsparv</title>
 </svelte:head>
 <style>
@@ -65,7 +90,7 @@
 </style>
 {#if intro}
     <h1 id="title" transition:slide>AFTONSPARV</h1>
-    <h3 style="font-weight: 200; margin-bottom: 100px;">Hackatime Viewer</h3>
+    <h3 style="font-weight: 200; margin-bottom: 80px;">Hackatime Viewer</h3>
 
     <div class="field" transition:fly={{y:200, delay: 500}}>
         <h2>Hackatime Sessions</h2>
@@ -84,8 +109,8 @@
         {#if sessions.length == 0 && !addSession}
         <h3><i>None selected</i></h3>
         {/if}
-        {#if !sessionsLocked}<h3 id="buttons"><button onclick={() => {addSession = true; setTimeout(() => {document.getElementById("newSessionInput").focus()}, 100);}}><span title="Add Session" translate = "no" class="material-symbols-outlined">add_circle</span></button><button onclick={() => {sessionsLocked = true; setTimeout(() => {document.getElementById("idInput").focus()}, 100);}}><span title="Confirm Sessions" translate = "no" class="material-symbols-outlined">check_circle</span></button></h3>
-        <p>If you wish to see overall user statistics, confirm without selecting any sessions.</p>{/if}
+        {#if !sessionsLocked}<h3 id="buttons"><button onclick={() => {addSession = true; setTimeout(() => {document.getElementById("newSessionInput").focus()}, 100);}}><span title="Add Session" translate = "no" class="material-symbols-outlined">add_circle</span></button><button onclick={() => {sessionsLocked = true; setTimeout(() => {document.getElementById("idInput").focus(); scrollTo(document.getElementById("idInput").y)}, 100);}}><span title="Confirm Sessions" translate = "no" class="material-symbols-outlined">check_circle</span></button></h3>
+        <p>If you wish to see overall user statistics, confirm without selecting any sessions. Use the <span style:font-family="Montserrat, Space Grotesk, Futura" style:font-weight = 700>ESC</span> keybind to confirm, or use the button.</p>{/if}
         {#if sessionsLocked}<h4 transition:slide={{axis:"x"}} style="position: absolute; top: 5px; right: 20px"><span style="font-weight: 700" translate="no" class="material-symbols-outlined">lock</span></h4>{/if}
     </div>
 
@@ -96,7 +121,8 @@
                 <h3>Enter Slack ID</h3>
                 <input required type="text" placeholder="Type here" id="idInput" bind:value={slackID}/>
                 <input type="submit" value="Enter ID" />
-                <p>*If you're not sure what the ID of an user is, use the #what-is-my-slack-id channel!</p>
+                <p>If you're not sure what the ID of an user is, use the <i>#what-is-my-slack-id</i> channel!</p>
+            </form>
         </div>
     {/if}
 
