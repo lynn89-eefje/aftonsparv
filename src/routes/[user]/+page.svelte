@@ -8,10 +8,11 @@
 
     let error = $state(false);
 
-    let name = $state("");
+    let name = $state("Loading");
     let trust = $state(0);
     let totalHours = $state("0h 0m");
     let dailyAverage = $state("0h 0m");
+    let langs = $state([]);
 
     onMount(function() {
         setTimeout(() => {intro = true;}, 100);
@@ -37,6 +38,7 @@
             trust = data.trust_factor.trust_value;
             totalHours = data.data.human_readable_total;
             dailyAverage = data.data.human_readable_daily_average;
+            langs = data.data.languages;
         }
         
     })
@@ -62,11 +64,11 @@
 
 
     #row1 {
-        width: 40vw;
+        width: 29vw;
     }
     #row2 {
-        width: 47vw;
-        height: 23vw;
+        width: 58vw;
+        height: 350px;
         overflow-y: scroll;
         overflow-x: hidden;
     }
@@ -91,6 +93,24 @@
         margin-right: 30px;
         padding: 5px;
         border-radius: 30px;
+    }
+
+    #langContainer {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+    }
+
+    .lang {
+        background-color: rgb(121, 134, 121);
+        margin: 10px;
+        border-radius: 30px;
+        width: 27vw;
+
+        span.text {
+            background-color: rgb(56, 71, 56);
+            padding: 5px;
+        }
     }
 </style>
 
@@ -120,7 +140,17 @@
                 <td>
                     <div class="field" id="row2">
                         <h3 style="font-family: Montserrat, Space Grotesk; font-weight: 800; font-size: 40px; margin-bottom: 2px;">{totalHours}</h3>
-                        <h3>Daily average of {dailyAverage}</h3>
+                        <h3 style="margin-bottom: 45px;">Daily average of {dailyAverage}</h3>
+                        <h2 style="margin-bottom: 1px">By Language</h2>
+                        <p>({langs.length})</p>
+                        <div id="langContainer">
+                            {#each langs as x}
+                                <div class="lang">
+                                    <h4 style="font-size: 25px;">{x.name}</h4>
+                                    <h5 style="font-size: 20px;">{x.text} <span class="text" style="padding: 5px; margin-left: 5px;">{x.percent}%</span></h5>
+                                </div>
+                            {/each}
+                        </div>
                     </div>
                 </td>
             </tr>
