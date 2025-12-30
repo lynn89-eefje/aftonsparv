@@ -1,38 +1,15 @@
-# sv
+# Aftonsparv
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+The revamped Hacktime Statistics Viewer for YSWS Organizers!
 
-## Creating a project
+## About the project
 
-If you're seeing this, you've probably already done this step. Congrats!
+Aftonsparv was made on SvelteKit, and is a revamped version of Oskar (hacklyn.city/oskar). YSWS organizers can easily view whole user data on Hackatime, trust factor, and combine the statistics from mutliple sessions into one unified view on Aftonsparv's UI. 
 
-```sh
-# create a new project in the current directory
-npx sv create
+## How to use
 
-# create a new project in my-app
-npx sv create my-app
-```
+Aftonsparv is available at hacklyn.city/aftonsparv
 
-## Developing
+It is fully usable through GUI interaction; however, it also uses keybinds (mainly ESC key), which you can utilize as directed on the UI.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+<img width="1434" height="770" alt="Capture d’écran 2025-12-29 à 11 38 35 PM" src="https://github.com/user-attachments/assets/94d2f853-613e-48bd-bd94-90eddb7a89c5" />
