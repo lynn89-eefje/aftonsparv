@@ -4,17 +4,126 @@
     import { base } from "$app/paths";
     import { page } from "$app/stores";
 
+    let errorMessage = $state([
+        "404",
+        "User could not be found. Maybe you entered the Slack ID incorrectly?"
+    ])
+
     let intro = $state(false);
 
     let error = $state(false);
 
     let name = $state("Loading");
     let trust = $state(0);
-    let totalHours = $state("0h 0m");
-    let dailyAverage = $state("0h 0m");
+    let totalUserSecs = 0;
+
+    let addedSecs = $state(0);
     let langs = $state([]);
+    let displayHours = $state("0h 0m");
 
     let sessions = $state([]);
+    let displaySessions = $state("");
+
+    $effect(() => {
+        if (sessions.length > 1) {
+            let text = "Filtered by sessions: "
+            for (let i = 0; i < sessions.length-1; i++) {
+                text += sessions[i] + ", "
+            }
+            text += sessions[sessions.length-1];
+            displaySessions = text;
+        }
+        else {
+            displaySessions = "Filtered by session: " + sessions[0];
+        }
+    })
+
+    onMount(async () => {
+        if ($page.params.sessions.indexOf("[x]") > 0) {
+            let processText = "";
+            for (let i = 0; i < $page.params.sessions.length; i++) {
+                if (processText.indexOf("[x]") > 0) {
+                    sessions.push(processText.substring(0, processText.length-3));
+                    i--;
+                    processText = ""; 
+                }
+                else {
+                    processText += $page.params.sessions.substring(i, i+1);
+                }
+            }
+            if (processText.length > 0) {
+                sessions.push(processText.substring(0, processText.length-3));
+            }
+        }
+        else {
+            sessions = [$page.params.sessions];
+        }
+        console.log(sessions);
+        let response = await fetch("https://hackatime.hackclub.com/api/v1/users/" + $page.params.user + "/stats");
+        if (!response.ok) {
+            error = true;
+            name = "404";
+        }
+        else {
+            let data = await response.json();
+            name = data.data.username;
+            trust = data.trust_factor.trust_value;
+            totalUserSecs = data.data.total_seconds;
+
+            for (let i in sessions) {
+                response = await fetch("https://hackatime.hackclub.com/api/v1/users/" + $page.params.user + "/stats?filter_by_project=" + sessions[i]);
+                data = await response.json();
+                if (data.data.total_seconds < totalUserSecs) {
+                    addedSecs += data.data.total_seconds;
+                }
+                else {
+                    error = true;
+                    name = "404";
+                    errorMessage[1] = "'" + sessions[i] + "' " + " session was not found. Did you mispell the session name?";
+                    return 0;
+                } 
+            }
+            if (addedSecs > totalUserSecs) {
+                console.log("ERROR: Added secs is greater than total user secs", addedSecs, totalUserSecs);
+            }
+            for (let i in sessions) {
+                response = await fetch("https://hackatime.hackclub.com/api/v1/users/" + $page.params.user + "/stats?filter_by_project=" + sessions[i]);
+                data = await response.json();
+                for (let x in data.data.languages) {
+                    let check = false;
+                    for (let lang in langs) {
+                        if (langs[lang].name == data.data.languages[x].name) {
+                            langs[lang].total_seconds += data.data.languages[x].total_seconds;
+                            check = true;
+                        }
+                    }
+                    if (!check) {
+                        langs.push({
+                            "name": data.data.languages[x].name,
+                            "total_seconds": data.data.languages[x].total_seconds
+                        })
+                    }
+                }
+            }
+            //console.log(langs);
+            for (let x in langs) {
+                langs[x].percent = Math.round((langs[x].total_seconds/addedSecs)*100);
+                let mins = Math.floor(langs[x].total_seconds/60);
+                let hours = Math.floor(mins/60);
+                let secs = langs[x].total_seconds - (mins*60);
+                mins = mins - (hours*60);
+                langs[x].text = hours + "h " + mins + "m " + secs + "s";
+            }
+            if (true) {
+                let mins = Math.floor(addedSecs/60);
+                let secs = addedSecs - (mins*60);
+                let hours = Math.floor(mins/60);
+                mins -= hours*60;
+                displayHours = hours + "h " + mins + "m " + secs + "s";
+            }
+
+        }
+    })
 
     onMount(function() {
         setTimeout(() => {intro = true;}, 100);
@@ -26,23 +135,6 @@
                 window.location.href = base + "/";
             }
         })
-    })
-
-    onMount(async function() {
-        let response = await fetch("https://hackatime.hackclub.com/api/v1/users/" + $page.params.user + "/stats?filter_by_project=" + $page.params.sessions);
-        if (!response.ok) {
-            error = true;
-            name = "404";
-        }
-        else {
-            let data = await response.json();
-            name = data.data.username;
-            trust = data.trust_factor.trust_value;
-            totalHours = data.data.human_readable_total;
-            dailyAverage = data.data.human_readable_daily_average;
-            langs = data.data.languages;
-        }
-        
     })
 
 </script>
@@ -141,8 +233,8 @@
                 </td>
                 <td>
                     <div class="field" id="row2">
-                        <h3 style="font-family: Montserrat, Space Grotesk; font-weight: 800; font-size: 40px; margin-bottom: 2px;">{totalHours}</h3>
-                        <h3 style="margin-bottom: 45px;">Daily average of {dailyAverage}</h3>
+                        <h4>{displaySessions}</h4>
+                        <h3 style="font-family: Montserrat, Space Grotesk; font-weight: 800; font-size: 40px; margin-bottom: 2px;">{displayHours}</h3>
                         <h2 style="margin-bottom: 1px">By Language</h2>
                         <p>({langs.length})</p>
                         <div id="langContainer">
@@ -160,8 +252,8 @@
     </table>
     <button style="position: fixed; left: 10px; top: 20px;" onclick={() => {window.location.href = base + "/"}}><span class="material-symbols-outlined" translate="no">arrow_circle_left</span></button>
     {:else}
-    <h1 style="font-size: 100px;">404</h1>
-    <h2 style="margin-bottom: 100px">User could not be found. Maybe you entered the Slack ID incorrectly?</h2>
+    <h1 style="font-size: 100px;">{errorMessage[0]}</h1>
+    <h2 style="margin-bottom: 100px">{errorMessage[1]}</h2>
     
     <h4><button style="font-size: 15px;" onclick={() => {window.location.href = base}}>Return Home</button></h4>
     <p>You can also use <span style:font-family="Montserrat, Space Grotesk, Futura" style:font-weight = 700>ESC</span> Key</p>

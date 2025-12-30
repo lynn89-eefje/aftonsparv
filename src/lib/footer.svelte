@@ -27,6 +27,19 @@
         left: 50%;
         max-width: 120px;
         bottom: 0;
+        animation: pulse infinite 2s ease-in-out;
+    }
+
+    @keyframes pulse {
+        0% {
+            bottom: 0
+        }
+        50% {
+            bottom: -5px
+        }
+        100% {
+            bottom: 0;
+        }
     }
 </style>
 

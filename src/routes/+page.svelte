@@ -21,7 +21,7 @@
     onMount(function() {
         setTimeout(() => {intro = true;}, 100);
         setTimeout(() => {document.getElementById("newSessionInput").focus()}, 200);
-    })
+    }) 
 
     function newSession() {
         event.preventDefault();
@@ -29,11 +29,19 @@
             sessions.push(newName);
             newName = "";
             addSession = false;
+            setTimeout(() => {addSession = true;}, 500);
+            setTimeout(() => {document.getElementById("newSessionInput").focus(); scrollTo(document.getElementById("newSessionInput").y)}, 600)
         }
     }
 
     function removeSession(target) {
-        sessions.shift(target);
+        let newList = []
+        for (let i = 0; i < sessions.length; i++) {
+            if (sessions[i] != target) {
+                newList.push(sessions[i]);
+            }
+        }
+        sessions = newList;
     }
 
     function next() {
