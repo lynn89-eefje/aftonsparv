@@ -105,7 +105,7 @@
         {#each sessions as x}
             <div transition:slide class="session"><h3>{x} {#if !sessionsLocked}<button class="cancelButton" onclick={() => {removeSession(x)}}><span class="material-symbols-outlined" translate="no">cancel</span></button>{/if}</h3></div>
         {/each}
-        {#if addSession}
+        {#if addSession && !sessionsLocked}
         <form transition:slide onsubmit={newSession}>
             <h3>Enter Session Name</h3>
             <input id="newSessionInput" required type="text" placeholder="Type here" bind:value={newName}/>
@@ -133,6 +133,7 @@
             </form>
         </div>
     {/if}
+    <!--<button style="position: absolute; top: 20px; right: 15px;"><span style="font-weight: 700" translate="no" class="material-symbols-outlined">account_circle</span></button>-->
 
 {/if}
 

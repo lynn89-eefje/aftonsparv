@@ -71,9 +71,11 @@
             totalUserSecs = data.data.total_seconds;
 
             for (let i in sessions) {
+                //console.log(sessions[i]);
                 response = await fetch("https://hackatime.hackclub.com/api/v1/users/" + $page.params.user + "/stats?filter_by_project=" + sessions[i]);
                 data = await response.json();
-                if (data.data.total_seconds < totalUserSecs) {
+                //console.log(data.data.total_seconds);
+                if (data.data.total_seconds < totalUserSecs && data.data.total_seconds != 0) {
                     addedSecs += data.data.total_seconds;
                 }
                 else {
@@ -85,26 +87,39 @@
             }
             if (addedSecs > totalUserSecs) {
                 console.log("ERROR: Added secs is greater than total user secs", addedSecs, totalUserSecs);
+                errorMessage[0] = "ERROR"
+                errorMessage[1] = "Safety conditional on line 86 is true";
+                error = true;
+                return 0;
             }
+            console.log(addedSecs);
             for (let i in sessions) {
                 response = await fetch("https://hackatime.hackclub.com/api/v1/users/" + $page.params.user + "/stats?filter_by_project=" + sessions[i]);
                 data = await response.json();
                 for (let x in data.data.languages) {
                     let check = false;
-                    for (let lang in langs) {
-                        if (langs[lang].name == data.data.languages[x].name) {
-                            langs[lang].total_seconds += data.data.languages[x].total_seconds;
-                            check = true;
+                    if (langs.length > 0) {
+                        for (let k in langs) {
+                            if (langs[k].name == data.data.languages[x].name) {
+                                //console.log("Conditional on 104 is true", data.data.languages[x].name, langs[k].name)
+                                langs[k].total_seconds += data.data.languages[x].total_seconds;
+                                check = true;
+                                break;
+                            }
                         }
                     }
                     if (!check) {
+                        //console.log(data.data.languages[x].name, data.data.languages[x].total_seconds);
                         langs.push({
                             "name": data.data.languages[x].name,
-                            "total_seconds": data.data.languages[x].total_seconds
+                            "total_seconds": data.data.languages[x].total_seconds,
+                            "sessions": [sessions[i]]
                         })
                     }
                 }
+                console.log(langs);
             }
+        
             //console.log(langs);
             for (let x in langs) {
                 langs[x].percent = Math.round((langs[x].total_seconds/addedSecs)*100);
@@ -131,7 +146,7 @@
 
     onMount(function() {
         document.addEventListener("keydown", function(event) {
-            if (event.key == "Escape" && error) {
+            if (event.key == "Escape") {
                 window.location.href = base + "/";
             }
         })
@@ -201,12 +216,14 @@
         border-radius: 30px;
         width: 27vw;
 
-        span.text {
-            background-color: rgb(56, 71, 56);
-            padding: 5px;
-        }
     }
 </style>
+<!--
+    span.text {
+        background-color: rgb(56, 71, 56);
+        padding: 5px;
+    }
+-->
 
 {#if intro}
     {#if !error}
@@ -241,7 +258,7 @@
                             {#each langs as x}
                                 <div class="lang">
                                     <h4 style="font-size: 25px;">{x.name}</h4>
-                                    <h5 style="font-size: 20px;">{x.text} <span class="text" style="padding: 5px; margin-left: 5px;">{x.percent}%</span></h5>
+                                    <h5 style="font-size: 20px;">{x.text} <!--<span class="text" style="padding: 5px; margin-left: 5px;">{x.percent}%</span>--></h5>
                                 </div>
                             {/each}
                         </div>
