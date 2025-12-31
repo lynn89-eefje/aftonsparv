@@ -47,7 +47,7 @@
 
 <div id="container" transition:fly={{y:200}}>
     <div>
-        <img src="/aftonsparv/images/afton.png" alt="Aftonsparv plushie" />
+        <img src="/images/afton.png" alt="Aftonsparv plushie" />
     </div>
 </div>
 {/if}
