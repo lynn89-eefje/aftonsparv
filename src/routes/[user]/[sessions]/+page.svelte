@@ -272,7 +272,7 @@
     <h1 style="font-size: 100px;">{errorMessage[0]}</h1>
     <h2 style="margin-bottom: 100px">{errorMessage[1]}</h2>
     
-    <h4><button style="font-size: 15px;" onclick={() => {window.location.href = base}}>Return Home</button></h4>
+    <h4><button style="font-size: 15px;" onclick={() => {window.location.href = base + "/"}}>Return Home</button></h4>
     <p>You can also use <span style:font-family="Montserrat, Space Grotesk, Futura" style:font-weight = 700>ESC</span> Key</p>
     {/if}
 {/if}
